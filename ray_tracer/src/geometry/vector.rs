@@ -79,6 +79,16 @@ impl Mul<Vec3> for f32 {
         }
     }
 }
+impl Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, v: Vec3) -> Vec3 {
+        Vec3 {
+            x: v.x * self.x,
+            y: v.y * self.y,
+            z: v.z * self.z,
+        }
+    }
+}
 impl Div<f32> for Vec3 {
     type Output = Self;
     fn div(self, f: f32) -> Self {
@@ -126,6 +136,9 @@ pub fn cross(a: &Vec3, b: &Vec3) -> Vec3 {
         z: a.x * b.y - a.y * b.x,
     }
 }
+pub fn reflect(v :&Vec3, n : &Vec3) -> Vec3 {
+    *v - 2f32 * dot(v, n) * *n
+}
 
 #[cfg(test)]
 mod tests {
@@ -171,6 +184,6 @@ mod tests {
     #[test]
     #[should_panic]
     fn vec3_div_0f32() {
-        let v = Vec3::new(1f32, 1f32, 1f32) / 0f32;
+        let _v = Vec3::new(1f32, 1f32, 1f32) / 0f32;
     }
 }

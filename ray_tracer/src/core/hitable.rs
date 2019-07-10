@@ -1,10 +1,22 @@
 use crate::geometry::{dot, Ray, Vec3};
 use std::f32;
+use std::rc::Rc;
+
+pub trait Material {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        rec: &HitRecord,
+        attenuation: &mut Vec3,
+        scattered: &mut Ray,
+    ) -> bool;
+}
 
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
     pub t: f32,
+    pub mat: Option<Rc<dyn Material>>,
 }
 impl HitRecord {
     pub fn new() -> Self {
@@ -12,6 +24,7 @@ impl HitRecord {
             p: Vec3::new(0f32, 0f32, 0f32),
             normal: Vec3::new(0f32, 0f32, 0f32),
             t: 0f32,
+            mat: None,
         }
     }
 }
@@ -30,7 +43,10 @@ impl HitList {
 }
 impl Hitable for HitList {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord { ..*rec };
+        let mut temp_rec = HitRecord {
+            mat: rec.mat.clone(),
+            ..*rec
+        };
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
         for h in self.list.iter() {
@@ -46,10 +62,11 @@ impl Hitable for HitList {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone)]
 pub struct SphereObject {
     pub center: Vec3,
     pub radius: f32,
+    pub mat: Option<Rc<dyn Material>>,
 }
 impl Hitable for SphereObject {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool {
