@@ -56,6 +56,7 @@ impl Hitable for HitList {
                 rec.normal = temp_rec.normal;
                 rec.p = temp_rec.p;
                 rec.t = temp_rec.t;
+                rec.mat = temp_rec.mat.clone();
             }
         }
         hit_anything
@@ -81,6 +82,7 @@ impl Hitable for SphereObject {
                 rec.t = temp;
                 rec.p = ray.point_at_parameter(rec.t);
                 rec.normal = (rec.p - self.center) / self.radius;
+                rec.mat = self.mat.clone();
                 return true;
             }
             temp = (-b + (b * b - a * c).sqrt()) / a;
@@ -88,6 +90,7 @@ impl Hitable for SphereObject {
                 rec.t = temp;
                 rec.p = ray.point_at_parameter(rec.t);
                 rec.normal = (rec.p - self.center) / self.radius;
+                rec.mat = self.mat.clone();
                 return true;
             }
         }

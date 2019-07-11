@@ -1,5 +1,5 @@
 use std::f32;
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, Sub, Neg};
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -119,6 +119,16 @@ impl DivAssign<f32> for Vec3 {
         self.z /= f;
     }
 }
+impl Neg for Vec3 {
+    type Output = Vec3;
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            x : -self.x,
+            y : -self.y,
+            z : -self.z,
+        }
+    }
+}
 pub fn normalize(a: Vec3) -> Vec3 {
     let l = a.length();
     if l == 0f32 {
@@ -136,8 +146,18 @@ pub fn cross(a: &Vec3, b: &Vec3) -> Vec3 {
         z: a.x * b.y - a.y * b.x,
     }
 }
-pub fn reflect(v :&Vec3, n : &Vec3) -> Vec3 {
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     *v - 2f32 * dot(v, n) * *n
+}
+pub fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f32, refracted: &mut Vec3) -> bool {
+    let uv = normalize(*v);
+    let dt = dot(&uv, n);
+    let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
+    if discriminant > 0.0 {
+        *refracted = ni_over_nt * (uv - *n * dt) - *n * discriminant.sqrt();
+        return true;
+    }
+    false
 }
 
 #[cfg(test)]

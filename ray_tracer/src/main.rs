@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 fn color(r: &mut geometry::Ray, world: &core::Hitable, depth: i32) -> geometry::Vec3 {
     let mut rec = core::HitRecord::new();
-    if world.hit(r, 0.001f32, f32::INFINITY, &mut rec) == true {
+    if world.hit(r, 0.001, f32::INFINITY, &mut rec) == true {
         let mut scattered = geometry::Ray::new(
             geometry::Vec3::new(0f32, 0f32, 0f32),
             geometry::Vec3::new(0f32, 0f32, 0f32),
@@ -34,40 +34,45 @@ fn main() {
     let mut world = core::HitList::new();
     world.list = vec![
         Box::new(core::SphereObject {
-            center: geometry::Vec3::new(0f32, 0f32, -1f32),
+            center: geometry::Vec3::new(0.0, 0.0, -1.0),
             radius: 0.5,
             mat: Some(Rc::new(core::materials::Lambertian::new(
                 geometry::Vec3::new(0.8, 0.3, 0.3),
             ))),
         }),
         Box::new(core::SphereObject {
-            center: geometry::Vec3::new(0f32, -100.5f32, -1f32),
+            center: geometry::Vec3::new(0.0, -100.5, -1.0),
             radius: 100.0,
             mat: Some(Rc::new(core::materials::Lambertian::new(
                 geometry::Vec3::new(0.8, 0.8, 0.0),
             ))),
         }),
         Box::new(core::SphereObject {
-            center: geometry::Vec3::new(1f32, 0f32, -1f32),
+            center: geometry::Vec3::new(1.0, 0.0, -1.0),
             radius: 0.5,
             mat: Some(Rc::new(core::materials::Metal::new(
                 geometry::Vec3::new(0.8, 0.6, 0.2),
+                0.0,
             ))),
         }),
-       Box::new(core::SphereObject {
-            center: geometry::Vec3::new(-1f32, 0f32, -1f32),
+        Box::new(core::SphereObject {
+            center: geometry::Vec3::new(-1.0, 0.0, -1.0),
             radius: 0.5,
-            mat: Some(Rc::new(core::materials::Metal::new(
-                geometry::Vec3::new(0.8, 0.8, 0.8),
-            ))),
+            mat: Some(Rc::new(core::materials::Dielectric::new(1.5))),
         }),
     ];
+    let lookfrom = geometry::Vec3::new(3.0, 3.0, 2.0);
+    let lookat = geometry::Vec3::new(0.0, 0.0, -1.0);
+    let dist_to_focus = (lookfrom - lookat).length();
+    let aperture: f32 = 2.0;
     let cam = core::Camera::new(
-        geometry::Vec3::new(-2f32, 2f32, 1f32),
-        geometry::Vec3::new(0f32, 0f32, -1f32),
-        geometry::Vec3::new(0f32, 1f32, 0f32),
-        90f32,
+        lookfrom,
+        lookat,
+        geometry::Vec3::new(0.0, 1.0, 0.0),
+        20.0,
         nx as f32 / ny as f32,
+        aperture,
+        dist_to_focus,
     );
     println!("P3\n{} {}\n255", nx, ny);
     for j in (0..ny).rev() {
