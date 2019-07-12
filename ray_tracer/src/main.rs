@@ -1,5 +1,6 @@
 mod core;
 mod geometry;
+use rand::Rng;
 use std::f32;
 use std::rc::Rc;
 
@@ -27,49 +28,91 @@ fn color(r: &mut geometry::Ray, world: &core::Hitable, depth: i32) -> geometry::
     (1.0 - t) * geometry::Vec3::new(1f32, 1f32, 1f32) + t * geometry::Vec3::new(0.5, 0.7, 1.0)
 }
 
+fn rand() -> f32 {
+    rand::thread_rng().gen()
+}
+
+fn random_scene(world: &mut core::HitList) {
+    world.list.push(Box::new(core::SphereObject {
+        center: geometry::Vec3::new(0.0, -1000.0, 0.0),
+        radius: 1000.0,
+        mat: Some(Rc::new(core::materials::Lambertian::new(
+            geometry::Vec3::new(0.5, 0.5, 0.5),
+        ))),
+    }));
+    world.list.push(Box::new(core::SphereObject {
+        center: geometry::Vec3::new(0.0, 1.0, 0.0),
+        radius: 1.0,
+        mat: Some(Rc::new(core::materials::Dielectric::new(1.5))),
+    }));
+    world.list.push(Box::new(core::SphereObject {
+        center: geometry::Vec3::new(-4.0, 1.0, 0.0),
+        radius: 1.0,
+        mat: Some(Rc::new(core::materials::Lambertian::new(
+            geometry::Vec3::new(0.5, 0.5, 0.5),
+        ))),
+    }));
+    world.list.push(Box::new(core::SphereObject {
+        center: geometry::Vec3::new(4.0, 1.0, 0.0),
+        radius: 1.0,
+        mat: Some(Rc::new(core::materials::Metal::new(
+            geometry::Vec3::new(0.7, 0.6, 0.5),
+            0.0,
+        ))),
+    }));
+    for a in -11..12 {
+        for b in -11..12 {
+            let choose_mat: f32 = rand::thread_rng().gen();
+            let center = geometry::Vec3::new(a as f32 + 0.9 * rand(), 0.2, b as f32 + 0.9 * rand());
+            if (center - geometry::Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    world.list.push(Box::new(core::SphereObject {
+                        center,
+                        radius: 0.2,
+                        mat: Some(Rc::new(core::materials::Lambertian::new(
+                            geometry::Vec3::new(rand() * rand(), rand() * rand(), rand() * rand()),
+                        ))),
+                    }));
+                } else if choose_mat < 0.95 {
+                    world.list.push(Box::new(core::SphereObject {
+                        center,
+                        radius: 0.2,
+                        mat: Some(Rc::new(core::materials::Metal::new(
+                            geometry::Vec3::new(
+                                0.5 * (1.0 + rand()),
+                                0.5 * (1.0 + rand()),
+                                0.5 * (1.0 + rand()),
+                            ),
+                            0.5 * rand(),
+                        ))),
+                    }));
+                } else {
+                    world.list.push(Box::new(core::SphereObject {
+                        center,
+                        radius: 0.2,
+                        mat: Some(Rc::new(core::materials::Dielectric::new(1.5))),
+                    }));
+                }
+            }
+        }
+    }
+}
+
 fn main() {
-    let nx = 200;
-    let ny = 100;
+    let nx = 800;
+    let ny = 400;
     let ns = 100;
     let mut world = core::HitList::new();
-    world.list = vec![
-        Box::new(core::SphereObject {
-            center: geometry::Vec3::new(0.0, 0.0, -1.0),
-            radius: 0.5,
-            mat: Some(Rc::new(core::materials::Lambertian::new(
-                geometry::Vec3::new(0.8, 0.3, 0.3),
-            ))),
-        }),
-        Box::new(core::SphereObject {
-            center: geometry::Vec3::new(0.0, -100.5, -1.0),
-            radius: 100.0,
-            mat: Some(Rc::new(core::materials::Lambertian::new(
-                geometry::Vec3::new(0.8, 0.8, 0.0),
-            ))),
-        }),
-        Box::new(core::SphereObject {
-            center: geometry::Vec3::new(1.0, 0.0, -1.0),
-            radius: 0.5,
-            mat: Some(Rc::new(core::materials::Metal::new(
-                geometry::Vec3::new(0.8, 0.6, 0.2),
-                0.0,
-            ))),
-        }),
-        Box::new(core::SphereObject {
-            center: geometry::Vec3::new(-1.0, 0.0, -1.0),
-            radius: 0.5,
-            mat: Some(Rc::new(core::materials::Dielectric::new(1.5))),
-        }),
-    ];
-    let lookfrom = geometry::Vec3::new(3.0, 3.0, 2.0);
-    let lookat = geometry::Vec3::new(0.0, 0.0, -1.0);
+    random_scene(&mut world);
+    let lookfrom = geometry::Vec3::new(12.0, 1.2, 4.0);
+    let lookat = geometry::Vec3::new(2.0, 1.0, 0.0);
     let dist_to_focus = (lookfrom - lookat).length();
-    let aperture: f32 = 2.0;
+    let aperture: f32 = 0.03;
     let cam = core::Camera::new(
         lookfrom,
         lookat,
         geometry::Vec3::new(0.0, 1.0, 0.0),
-        20.0,
+        30.0,
         nx as f32 / ny as f32,
         aperture,
         dist_to_focus,
