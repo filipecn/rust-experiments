@@ -1,5 +1,6 @@
 use crate::core::{HitRecord, Material};
-use crate::geometry::{dot, normalize, reflect, random_in_unit_sphere, Ray, Vec3};
+use crate::geometry::{dot, normalize, reflect, Ray, Vec3};
+use crate::common::random_in_unit_sphere; 
 
 pub struct Metal {
     albedo: Vec3,
@@ -25,7 +26,7 @@ impl Material for Metal {
     ) -> bool {
         let v = normalize(r_in.d);
         let reflected = reflect(&v, &rec.normal);
-        *scattered = Ray::new(rec.p, reflected + self.fuzz * random_in_unit_sphere());
+        *scattered = Ray::new(rec.p, reflected + self.fuzz * random_in_unit_sphere(), r_in.time);
         *attenuation = self.albedo;
         dot(&scattered.d, &rec.normal) > 0f32
     }

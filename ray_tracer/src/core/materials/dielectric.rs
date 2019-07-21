@@ -1,6 +1,6 @@
 use crate::core::{HitRecord, Material};
 use crate::geometry::{dot, reflect, refract, Ray, Vec3};
-use rand::Rng;
+use crate::common::rand;
 
 pub struct Dielectric {
     ref_idx: f32
@@ -40,12 +40,12 @@ impl Material for Dielectric {
         } else {
             reflect_prob = 1.0;
         }
-        let rand_value : f32 = rand::thread_rng().gen();
+        let rand_value : f32 = rand();
         if rand_value < reflect_prob {
-            *scattered = Ray::new(rec.p, reflected);
+            *scattered = Ray::new(rec.p, reflected, r_in.time);
         }
         else {
-        }    *scattered = Ray::new(rec.p, refracted);
+        }    *scattered = Ray::new(rec.p, refracted, r_in.time);
             
         true
     }

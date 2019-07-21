@@ -4,12 +4,14 @@ use crate::geometry::Vec3;
 pub struct Ray {
     pub o : Vec3,
     pub d : Vec3,
+    pub time: f32
 }
 impl Ray {
-    pub fn new(origin : Vec3, direction : Vec3) -> Self {
+    pub fn new(origin : Vec3, direction : Vec3, time : f32) -> Self {
         Self {
             o : origin,
             d : direction,
+            time
         }
     }
 }
