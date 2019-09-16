@@ -1,0 +1,5 @@
+dec/target
+ray_tracer/target
+parallel_blas/target
+ponos/target
+.vscode
