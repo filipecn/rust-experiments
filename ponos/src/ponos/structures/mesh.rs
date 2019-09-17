@@ -1,18 +1,17 @@
-extern crate nalgebra_glm as glm;
-extern crate tobj;
-use std::path::Path;
+use crate::ponos::geometry::Point3;
+
 
 struct HalfEdge {
     pub vertex: u32,
     pub face: i32,
-    pub next: i32,
+    pub next: i32
 }
 
 struct Vertex {
     // One HE connected to it
     pub he: i32,
     // Vertex's position in Euclidian space
-    pub position: glm::Vec3,
+    pub position: Point3,
 }
 
 struct Face {
@@ -30,11 +29,7 @@ pub struct Mesh {
     faces: Vec<Face>,
     // Each vertex holds its position in Euclidian space and a HE
     // index that is connected to it.
-    vertices: Vec<Vertex>
-}
-
-fn load_obj(file: &String) {
-    let obj = tobj::load_obj(&Path::new(file));
+    vertices: Vec<Vertex>,
 }
 
 impl Mesh {
@@ -45,6 +40,10 @@ impl Mesh {
             vertices: Vec::new(),
         }
     }
+    //       pub fn from_obj(file : String) -> Self {
+    //            Self {
+    //      }
+    //  }
     pub fn twin(&self, he: u32) -> i32 {
         if he % 2 == 0 {
             return (he + 1) as i32;
@@ -52,11 +51,11 @@ impl Mesh {
         (he - 1) as i32
     }
     pub fn next(&self, he: u32) {}
-    pub fn add_vertex(&mut self, position: glm::Vec3) -> u32 {
+    pub fn add_vertex(&mut self, position: Point3) -> u32 {
         let size = self.vertices.len();
         self.vertices.push(Vertex {
             he: -1,
-            position,
+            position: position,
         });
         size as u32
     }
@@ -67,12 +66,12 @@ impl Mesh {
         self.half_edges.push(HalfEdge {
             face: -1,
             vertex: i as u32,
-            next: -1,
+            next : -1
         });
         self.half_edges.push(HalfEdge {
             face: -1,
             vertex: j as u32,
-            next: -1,
+            next : -1
         });
         size as u32
     }
@@ -86,14 +85,14 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::structures::Mesh;
-    extern crate nalgebra_glm as glm;
+    use crate::ponos::geometry::Point3;
+    use crate::ponos::structures::Mesh;
     #[test]
     fn empty_mesh() {
         let mut m: Mesh = Mesh::new();
         assert_eq!(0 as usize, m.vertex_count());
         for _ in 0..10 {
-            m.add_vertex(glm::vec3(0f32, 0f32, 0f32));
+            m.add_vertex(Point3::new(0f32, 0f32, 0f32));
         }
         assert_eq!(10 as usize, m.vertex_count());
     }

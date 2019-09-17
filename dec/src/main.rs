@@ -1,3 +1,4 @@
+mod render_gl;
 mod structures;
 extern crate gl;
 extern crate glfw;
@@ -17,6 +18,32 @@ fn main() {
     gl::Viewport::load_with(|s| glfw.get_proc_address_raw(s));
     gl::ClearColor::load_with(|s| glfw.get_proc_address_raw(s));
     gl::Clear::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::ShaderSource::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::CompileShader::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::GetShaderiv::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::GetShaderInfoLog::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::CreateShader::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::DeleteShader::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::AttachShader::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::DetachShader::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::CreateProgram::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::GetProgramInfoLog::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::GetProgramiv::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::LinkProgram::load_with(|s| glfw.get_proc_address_raw(s));
+    gl::UseProgram::load_with(|s| glfw.get_proc_address_raw(s));
+
+    use std::ffi::CString;
+
+    let vert_shader =
+        render_gl::Shader::from_vert_source(&CString::new(include_str!("triangle.vert")).unwrap())
+            .unwrap();
+
+    let frag_shader =
+        render_gl::Shader::from_frag_source(&CString::new(include_str!("triangle.frag")).unwrap())
+            .unwrap();
+
+    let shader_program = render_gl::Program::from_shaders(&[vert_shader, frag_shader]).unwrap();
+    shader_program.set_used();
     while !window.should_close() {
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
